@@ -1,4 +1,4 @@
-function [userrss, usert, userber, usermag, userpha] = getInfo2(user)
+function [userrss, usert, userber, usermag, userpha] = getRadarInfo(user)
 
 userrss = table2array(user(:,end));
 usert = table2array(user(:,1));
