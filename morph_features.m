@@ -3,17 +3,50 @@ clc;
 close all;
 clear all;
 
+%% **** Load Data
+trial = 1; 
+freq_vals = [0.2000, 0.2500, 0.3000, 0.3167, 0.3333, 0.3500, 0.3667, 0.4000, 0.4500, 0.5000];
 
-%% Import Data
+fig1 = figure(3);
+clf(3);
 
-load('Data/data.mat')
-I1 = data2file(:,1);
-Q1 = data2file(:,2);
-I2 = data2file(:,3);
-Q2 = data2file(:,4);
-% CB1 = data2file(:,5);
-% CB2 = data2file(:,6);
-time = data2file(:,7);
+% Select Data by parameters 
+freq = freq_vals(fat_index); % of 10
+
+belt_data = ['Data/trial' num2str(trial) '/' num2str(freq,'%0.4f') 'Hz_belt_' num2str(trial) '_trial.txt'];
+radar_data = ['Data/trial' num2str(trial) '/' num2str(freq,'%0.4f') 'Hz_radar_' num2str(trial) '_trial.csv'];
+noise_data = ['Data/trial' num2str(trial) '/0.0000Hz_radar_' num2str(trial) '_trial_background.csv'];
+
+
+C = readtable(belt_data); % AKA belt/CB/C
+
+B = readtable(radar_data); % AKA radar/binary/B
+
+
+%% Get RSS, Time, BER, Magnitude, and Phase Data
+[Brss, Bt, Bber, Bmag, Bpha] = getInfo2(B);
+
+% convert Bt to relative time
+Bt = Bt(:,1) - Bt(1,1); 
+
+[Ct, Cpha] = getInfo3(C);
+
+
+%% Get CSI for Data Set c
+c = 1;
+Bcsi = Bmag .* exp(1i.*Bpha);
+
+for ii = 1:32
+    if ii == 32
+        Bcsi(:,ii) = 1 ./ Bcsi(:,ii);
+    else
+        Bcsi(:,ii) = 1 ./ ((Bcsi(:,ii+1)-Bcsi(:,ii))/5 * c + Bcsi(:,ii));
+    end
+end
+
+
+%% Initialize Channel Names
+labelArr = strings(32,1);
 
 
 %% Preprocess Data
